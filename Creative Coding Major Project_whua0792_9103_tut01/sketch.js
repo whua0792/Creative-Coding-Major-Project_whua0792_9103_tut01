@@ -190,18 +190,34 @@ class Meteor {
     this.y = 0;
     this.vx = 4;
     this.vy = 4;
+
+    this.noiseOffsetX = random(1000); // Offset for Perlin noise in the x direction
+    this.noiseOffsetY = random(1000); // Offset for Perlin noise in the y direction
+    this.noiseSpeed = 0.01; // Speed of Perlin noise change
   }
   display() {
     // Draw the meteor and its tail
-    fill(255);
-    stroke(255, 150);
-    ellipse(this.x, this.y, random(4, 7));
-    line(this.x, this.y, - this.vx * 10 + this.x, - this.vy * 10 + this.y)
+    fill(200);
+    stroke(150, 150);
+    ellipse(this.x, this.y, random(4, 7)); // Meteor's body
+    line(this.x, this.y, this.x - this.vx * 10, this.y - this.vy * 10); // Meteor's tail
   }
   update() {
-    // Make the meteor move.
+    // Apply Perlin noise to introduce subtle random variations in velocity
+    let noiseX = map(noise(this.noiseOffsetX), 0, 1, -1, 1); // Horizontal Perlin noise
+    let noiseY = map(noise(this.noiseOffsetY), 0, 1, -1, 1); // Vertical Perlin noise
+    
+    // Adjust velocities slightly using Perlin noise while keeping the general direction
+    this.vx = 4 + noiseX * 2; // Slight variation in the horizontal velocity
+    this.vy = 4 + noiseY * 2; // Slight variation in the vertical velocity
+
+    // Update the position of the meteor based on the velocities
     this.x += this.vx;
     this.y += this.vy;
+
+    // Increment the noise offsets for the next frame
+    this.noiseOffsetX += this.noiseSpeed;
+    this.noiseOffsetY += this.noiseSpeed;
   }
 }
 
@@ -226,9 +242,42 @@ class Circle {
     this.noiseOffsetY = random(2); // Random offset for Perlin noise
     this.noiseOffsetSize = random(3000); // Random offset for Perlin noise on size
     this.noiseSpeed = 0.01; // Control the speed of the Perlin noise effect
-  
-    this.init();
-  }
+    
+    // Define movement direction (initialize randomly)
+    this.velX = random(0, 1);
+    this.velY = random(-1, 0);
+
+    this.init();}
+
+    update() {
+     // Apply Perlin noise to create smooth movement for x and y positions
+     this.x += map(noise(this.noiseOffsetX), 0, 10, 0, 1000); // Smooth horizontal motion
+     this.y += map(noise(this.noiseOffsetY), 0, 10, 0, 1000); // Smooth vertical motion
+     // Apply Perlin noise to control the size (cirSize) of the circle
+     this.cirSize = map(noise(this.noiseOffsetSize), 0, 1, 100, 200); // Map noise to a range for circle size (50 to 150)
+ 
+     // Boundary for constraint (you can adjust 50 here to set buffer for the boundary)
+     let boundary = -100;
+     
+     // Check horizontal boundaries
+     if (this.x < -boundary || this.x > width + boundary) {
+       this.velX *= -1; // Reverse horizontal direction
+     }
+     
+     // Check vertical boundaries
+     if (this.y < -boundary || this.y > height + boundary) {
+       this.velY *= -1; // Reverse vertical direction
+     }
+     
+     // Update positions based on velocity
+     this.x += this.velX;
+     this.y += this.velY;
+ 
+     // Update the noise offsets for the next frame
+     this.noiseOffsetX += this.noiseSpeed;
+     this.noiseOffsetY += this.noiseSpeed;
+     this.noiseOffsetSize += this.noiseSpeed; // Increment the noise offset for size
+   }
 
   init() {
     // Add different types of particles at different positions based on the type of dynamic circle ring 
