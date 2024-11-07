@@ -98,13 +98,13 @@ function draw() {
     let inter = map(adjustedY, 0, colorBandHeight  / scaleFactor * colors.length, 0, 1);
 
     // Select two colors to blend based on position
-    let colorIndex = floor(inter * (colors.length - 1));
+    let colorIndex = floor(inter * (colors.length - 1)); // This technique is from https://p5js.org/reference/p5/floor/
     let nextColorIndex = (colorIndex + 1) % colors.length;
 
     // Blend between the two colors
     let blendAmount = (inter * (colors.length - 1)) - colorIndex;
     let c = lerpColor(colors[colorIndex], colors[nextColorIndex], blendAmount);
-
+    // This technique is from https://p5js.org/reference/p5/lerpColor/
     // Draw the line with the blended color
     stroke(c);
     line(0, y, width / scaleFactor, y);
@@ -127,9 +127,8 @@ function draw() {
   for (let i = meteors.length - 1; i >= 0; i--) {
     // Clear the meteor when it reaches the bottom of the canvas.
     if (meteors[i].y > height / scaleFactor + 100)
-      meteors.splice(i, 1);
+      meteors.splice(i, 1); // This technique is from https://p5js.org/reference/p5/splice/
   }
-
 
     // Draw a transparent gradient white circle under each dynamic circle ring.
   for (let i = 0; i < cirs.length; i++) {
@@ -264,7 +263,8 @@ class Circle {
     this.velX = random(0, 1);
     this.velY = random(-1, 0);
 
-    this.init();}
+    this.init();
+  }
 
     update() {
 
@@ -390,11 +390,6 @@ class Circle {
     this.angle += this.rotateDir * 1; // Make the circle ring rotate.
   
 }}
-
-function mousePressed() {
-  // Toggle the state when mouse is clicked
-  isNoisyState = !isNoisyState;
-}
 
 function mousePressed() {
   // Toggle the state when mouse is clicked
