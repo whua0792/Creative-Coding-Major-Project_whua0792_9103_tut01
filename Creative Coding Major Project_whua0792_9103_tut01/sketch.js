@@ -6,7 +6,7 @@ let scaleFactor = 1; // Scale factor for resizing content
 let img; // Declare a variable to store the image
 
 function preload() {
-  // Preload the image of the hologram star
+  // Preload the image of the hologram circle
   img = loadImage("https://png.pngtree.com/png-vector/20240601/ourmid/pngtree-circle-gradient-holographic-sphere-button-png-image_12588776.png");
 // This image is from https://pngtree.com/so/holographic-circle.
 }
@@ -107,7 +107,7 @@ function draw() {
     cirs[i].display();
     
     drawWhiteCircle(cirs[i]); // Draw a white circular border around each dynamic ring
-    drawImagesAroundCircle(cirs[i]); // Draw the hologram star images around the circle rings
+    drawImagesAroundCircle(cirs[i]); // Draw the hologram circle images around the circle rings
   } 
 }
 
@@ -119,7 +119,7 @@ function drawWhiteCircle(circle) {
   ellipse(circle.x, circle.y, circle.cirSize * 2.05);
 }
 
-// Function to draw the hologram star images around the circle rings
+// Function to draw the hologram circle images around the circle rings
 function drawImagesAroundCircle(circle) {
   let numImages = 15; // Set the number of images.
   for (let j = 0; j < numImages; j++) {
@@ -192,6 +192,11 @@ class Circle {
     if (random(1) < 0.5) {
       this.rotateDir = -1;
     }
+
+    this.noiseOffsetX = random(2); // Random offset for Perlin noise
+    this.noiseOffsetY = random(2); // Random offset for Perlin noise
+    this.noiseSpeed = 0.01; // Control the speed of the Perlin noise effect
+  
     this.init();
   }
 
@@ -265,6 +270,14 @@ class Circle {
   }
 
   display() {
+        // Apply Perlin noise to create smooth movement for x and y positions
+        this.x += map(noise(this.noiseOffsetX), 0, 1, -1, 1); // Smooth horizontal motion
+        this.y += map(noise(this.noiseOffsetY), 0, 1, -1, 1); // Smooth vertical motion
+    
+        // Update the noise offsets for the next frame
+        this.noiseOffsetX += this.noiseSpeed;
+        this.noiseOffsetY += this.noiseSpeed;
+
     for (let i = 0; i < this.parts.length; i++) {
       // Draw particles inside the dynamic circle ring
       push();
