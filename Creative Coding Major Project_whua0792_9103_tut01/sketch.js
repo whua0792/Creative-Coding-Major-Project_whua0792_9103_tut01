@@ -2,8 +2,12 @@ let cirs = []; // Used to store 4 types of dynamic circle ring
 let stars = []; // Used to store stars
 let meteors = []; // Used to store meteors
 let scaleFactor = 1; // Scale factor for resizing content
-
 let img; // Declare a variable to store the image
+
+let colors;
+let offsetY = 0; // This will control the upward scrolling effect
+let scrollSpeed = 5; // Adjust this value for scroll speed
+let colorBandHeight = 100; // Adjust this to increase the height of each color band
 
 function preload() {
   // Preload the image of the hologram circle
@@ -15,6 +19,17 @@ function setup() {
 
   createCanvas(900, 900);
   angleMode(DEGREES);
+
+  colors = [
+    color(10, 30, 90),  // dark indigo-blue
+    color(1, 17, 92),   // dark blue
+    color(60, 6, 102),  // dark purple
+    color(120, 8, 90),  // dark red
+    color(140, 50, 50), // dark orange
+    color(80, 100, 20), // dark yellow-green
+    color(0, 60, 50),   // dark teal-green
+    color(10, 30, 90)   // dark indigo-blue
+  ];
 
   // Add circle rings at different positions: the first parameter is the x-coordinate, 
   // the second is the y-coordinate, the third is the circle ring type, 
@@ -48,21 +63,35 @@ function setup() {
 
 function draw() {
 
-    // Calculate the scale factor and apply it to the content.
-    scale(scaleFactor);
+  background(0); // Clear the background
 
-   // Create a gradient background from dark blue to dark purple.
-   let topColor = color(1, 17, 92); // dark blue
-   let bottomColor = color(60, 6, 102); // dark purple
- 
-   // Generate a color gradient between dark blue and black using `lerpColor()`.
-   // This technique is from https://p5js.org/reference/p5/lerpColor/
-   for (let y = 0; y < height / scaleFactor; y++) {
-     let inter = map(y, 0, height / scaleFactor, 0, 1);
-     let c = lerpColor(topColor, bottomColor, inter);
-     stroke(c);
-     line(0, y, width / scaleFactor, y);
-   }
+// Calculate the scale factor and apply it to the content.
+  scale(scaleFactor);
+
+  // Increase the offset for scrolling effect
+  offsetY += scrollSpeed;
+  if (offsetY >= colorBandHeight  / scaleFactor * colors.length) {
+    offsetY = 0; // Loop the offset
+  }
+
+  // Draw the gradient
+  for (let y = 0; y < height  / scaleFactor; y++) {
+    // Calculate adjusted position with offsetY and wrap around
+    let adjustedY = (y + offsetY) % (colorBandHeight  / scaleFactor * colors.length);
+    let inter = map(adjustedY, 0, colorBandHeight  / scaleFactor * colors.length, 0, 1);
+
+    // Select two colors to blend based on position
+    let colorIndex = floor(inter * (colors.length - 1));
+    let nextColorIndex = (colorIndex + 1) % colors.length;
+
+    // Blend between the two colors
+    let blendAmount = (inter * (colors.length - 1)) - colorIndex;
+    let c = lerpColor(colors[colorIndex], colors[nextColorIndex], blendAmount);
+
+    // Draw the line with the blended color
+    stroke(c);
+    line(0, y, width / scaleFactor, y);
+  }
 
    // Start creating the meteor section:
   if (random(1) < 0.1) {
@@ -195,6 +224,7 @@ class Circle {
 
     this.noiseOffsetX = random(2); // Random offset for Perlin noise
     this.noiseOffsetY = random(2); // Random offset for Perlin noise
+    this.noiseOffsetSize = random(3000); // Random offset for Perlin noise on size
     this.noiseSpeed = 0.01; // Control the speed of the Perlin noise effect
   
     this.init();
@@ -273,10 +303,14 @@ class Circle {
         // Apply Perlin noise to create smooth movement for x and y positions
         this.x += map(noise(this.noiseOffsetX), 0, 1, -1, 1); // Smooth horizontal motion
         this.y += map(noise(this.noiseOffsetY), 0, 1, -1, 1); // Smooth vertical motion
+        // Apply Perlin noise to control the size (cirSize) of the circle
+        this.cirSize = map(noise(this.noiseOffsetSize), 0, 1, 100, 200); // Map noise to a range for circle size (50 to 150)
+
     
         // Update the noise offsets for the next frame
         this.noiseOffsetX += this.noiseSpeed;
         this.noiseOffsetY += this.noiseSpeed;
+        this.noiseOffsetSize += this.noiseSpeed; // Increment the noise offset for size
 
     for (let i = 0; i < this.parts.length; i++) {
       // Draw particles inside the dynamic circle ring
@@ -297,6 +331,7 @@ class Particle1 {
     this.y = y;
     this.alp = alp;
     this.sw = 4; // Set the size
+  
 
     this.r = red(col);
     this.g = green(col);
