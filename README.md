@@ -2,11 +2,11 @@
 
 ### __Instructions on how to interact with the work:__
 
-- After opening the file, the animation will start directly. 
-- You can stay for a while to appreciate the graphics floating very slowly. 
-- After appreciating, you can click the screen with your mouse, and some of the graphics will spread out. 
-- Click again to stop spreading, and click again to continue spreading. 
-- If you want to return to the original state, you can only refresh the screen. (The meaning of this interaction will be explained later)
+- AThe animation will start automatically when the file is opened. 
+- You can watch the graphics float slowly for a while. 
+- Afterward, you can click the screen, and some of the graphics will scatter.
+- Click again to stop the spreading, and click once more to resume it. 
+- To return to the original state, simply refresh the screen. (The meaning of this interaction will be explained later.)
 
 ### __Details of your individual approach to animating the group code.__
 #### I chose the Perlin noise and randomness to drive my individual code.
@@ -38,7 +38,7 @@
 
 #### Code Changes from Group Code：
 1.  #### Dynamic Circle Ring：
-By calling the noise() function, I add randomness to the coordinates and size of the rings, creating subtle floating effects.
+I use the noise() function to add randomness to the coordinates and size of the rings, creating subtle floating effects.
  ```
  // Apply Perlin noise to create smooth movement for x and y positions
      this.x += map(noise(this.noiseOffsetX), 0, 10, 0, 1000); // Smooth horizontal motion
@@ -48,7 +48,7 @@ By calling the noise() function, I add randomness to the coordinates and size of
 ```
 
 2. #### Mousepress interaction：
-In the code, the click interaction is implemented so that each click converts some of the circles into particles, which scatter outward and gradually fade away. This effect combines changes in opacity and dispersion, aligning with the concept of irreversible memories.
+The mouse-press interaction in the code converts some of the circles into particles with each click, which scatter outward and gradually fade away.
 ```
 function mousePressed() {
   // Toggle the state when mouse is clicked
@@ -184,8 +184,7 @@ This technique is from https://p5js.org/reference/p5/floor/
     let nextColorIndex = (colorIndex + 1) % colors.length;
 
 ```
-- 
-To clean up meteor objects that move off the canvas, I used the **splice()** function to remove them from the array.
+- To clean up meteor objects that move off the canvas, I used the **splice()** function to remove them from the array.
 ```
   for (let i = meteors.length - 1; i >= 0; i--) {
     // Clear the meteor when it reaches the bottom of the canvas.
