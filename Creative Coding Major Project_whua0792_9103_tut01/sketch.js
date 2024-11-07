@@ -9,6 +9,10 @@ let offsetY = 0; // This will control the upward scrolling effect
 let scrollSpeed = 5; // Adjust this value for scroll speed
 let colorBandHeight = 100; // Adjust this to increase the height of each color band
 
+let particles = [];
+let isNoisyState = false;  // Track whether we are in the noisy state or not
+
+
 function preload() {
   // Preload the image of the hologram circle
   img = loadImage("https://png.pngtree.com/png-vector/20240601/ourmid/pngtree-circle-gradient-holographic-sphere-button-png-image_12588776.png");
@@ -35,9 +39,9 @@ function setup() {
   // the second is the y-coordinate, the third is the circle ring type, 
   // the fourth is the circle ring size, and the fifth is the color
 
-  cirs.push(new Circle(20, 9, 1, 190, color(128, 89, 136))); // First circle ring in the top left
+  cirs.push(new Circle(80, 91, 1, 150, color(128, 89, 136))); // First circle ring in the top left
 
-  cirs.push(new Circle(345, 130, 2, 130, color(240, 250, 157))); // Second circle ring at the top
+  cirs.push(new Circle(345, 130, 2, 100, color(240, 250, 157))); // Second circle ring at the top
 
   cirs.push(new Circle(650, 71, 3, 150, color(154, 160, 196))); // Third circle ring at the top
 
@@ -49,7 +53,7 @@ function setup() {
 
   cirs.push(new Circle(-40, 715, 1, 200, color(255))); // First circle ring at the bottom edge
 
-  cirs.push(new Circle(630, 903, 4, 200, color(153, 191, 236))); // Third circle ring at the bottom edge
+  cirs.push(new Circle(630, 800, 4, 150, color(153, 191, 236))); // Third circle ring at the bottom edge
 
   cirs.push(new Circle(310, 730, 2, 120, color(153, 191, 236))); // Second circle ring at the bottom edge
 
@@ -59,11 +63,24 @@ function setup() {
     // Add 500 stationary stars
     stars.push(new Star());
   }
+
+  // Create some initial particles
+  for (let i = 0; i < 100; i++) {
+    let x = random(width);
+    let y = random(height);
+    let col = color(random(255), random(255), random(255));
+    particles.push(new Particle1(x, y, 255, col));
+  }
 }
 
 function draw() {
 
   background(0); // Clear the background
+  
+  // Display all particles
+   for (let i = 0; i < particles.length; i++) {
+    particles[i].display();
+  }
 
 // Calculate the scale factor and apply it to the content.
   scale(scaleFactor);
@@ -250,6 +267,7 @@ class Circle {
     this.init();}
 
     update() {
+
      // Apply Perlin noise to create smooth movement for x and y positions
      this.x += map(noise(this.noiseOffsetX), 0, 10, 0, 1000); // Smooth horizontal motion
      this.y += map(noise(this.noiseOffsetY), 0, 10, 0, 1000); // Smooth vertical motion
@@ -373,25 +391,77 @@ class Circle {
   
 }}
 
+function mousePressed() {
+  // Toggle the state when mouse is clicked
+  isNoisyState = !isNoisyState;
+}
+
+function mousePressed() {
+  // Toggle the state when mouse is clicked
+  isNoisyState = !isNoisyState;
+}
+
 // Two types of particles
+// The Particle1 class, with two states based on the value of isNoisyState
 class Particle1 {
   constructor(x, y, alp, col) {
-    this.x = x;
-    this.y = y;
-    this.alp = alp;
-    this.sw = 4; // Set the size
+      this.x = x;
+      this.y = y;
+      this.alp = alp;
+      this.sw = 4; // Initial size of the stroke
   
+      // Color components
+      this.r = red(col);
+      this.g = green(col);
+      this.b = blue(col);
 
-    this.r = red(col);
-    this.g = green(col);
-    this.b = blue(col);
+    // Perlin noise offsets for smooth randomness (for noisy state)
+    this.noiseOffsetX = random(1000);
+    this.noiseOffsetY = random(1000);
+    this.noiseSpeed = 1; // Controls how fast the Perlin noise evolves
+
+    // Random values for slight variations in stroke size and opacity (for noisy state)
+    this.randomSizeFactor = random(0.5, 1.5); // Random variation in stroke size
+    this.randomAlphaFactor = random(200, 255); // Random opacity factor
   }
+
+
   display() {
-    strokeWeight(this.sw);
-    stroke(this.r, this.g, this.b, this.alp);
-    point(this.x, this.y);
+    if (!isNoisyState) {
+      // Original state: just draw a stationary particle
+      strokeWeight(this.sw);
+      stroke(this.r, this.g, this.b, this.alp);
+      point(this.x, this.y);
+    } else {
+      // Noisy state: apply Perlin noise and random variations
+      // Update position with Perlin noise to create smooth movement
+      let perlinX = map(noise(this.noiseOffsetX), 0, 1, -1, 1);
+      let perlinY = map(noise(this.noiseOffsetY), 0, 1, -1, 1);
+
+      // Apply the random changes based on Perlin noise
+      this.x += perlinX * 2; // Use noise for horizontal movement
+      this.y += perlinY * 2; // Use noise for vertical movement
+
+      // Optionally, add randomness to the size of the stroke over time
+      this.sw = 4 + random(-1, 1) * this.randomSizeFactor;
+
+      // Optionally, add randomness to the opacity for visual effect
+      this.alp = this.alp * random(0.8, 1.2);
+
+      // Set stroke properties
+      strokeWeight(this.sw);
+      stroke(this.r, this.g, this.b, this.alp);
+
+      // Draw the particle as a point
+      point(this.x, this.y);
+
+      // Update Perlin noise offsets for next frame
+      this.noiseOffsetX += this.noiseSpeed;
+      this.noiseOffsetY += this.noiseSpeed;
+    }
   }
 }
+
 class Particle2 {
   constructor(x, y, sw, col) {
     this.x = x;
